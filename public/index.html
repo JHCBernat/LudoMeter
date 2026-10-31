@@ -8,13 +8,15 @@
   <meta name="theme-color" content="#05060a">
   <style>
     :root {
-      --bg: #05060a;
-      --card-bg: rgba(255, 255, 255, 0.03);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text: #f4f1ea;
-      --text-muted: #8b8f98;
-      --accent: #ffb24d;
-      --accent-glow: rgba(255, 178, 77, 0.15);
+      --bg-deep: #120e0b;
+      --bg-card: rgba(35, 26, 18, 0.85);
+      --card-border: rgba(212, 175, 55, 0.35);
+      --card-border-hover: rgba(212, 175, 55, 0.8);
+      --text: #fdfaf3;
+      --text-muted: #c4b69c;
+      --gold: #d4af37;
+      --gold-light: #fbe8a6;
+      --gold-glow: rgba(212, 175, 55, 0.4);
       --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     }
 
@@ -22,99 +24,178 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--bg-deep);
       color: var(--text);
       min-height: 100vh;
-      padding: 20px 16px env(safe-area-inset-bottom);
-      overflow-x: hidden;
+      padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+      max-width: 480px; /* Optimized mobile-first for Galaxy S23 */
+      margin: 0 auto;
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 178, 77, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(138, 107, 255, 0.04) 0%, transparent 40%);
+        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.2) 0%, transparent 70%),
+        url('https://images.unsplash.com/photo-1514539079130-25950c84af65?q=80&w=1000&auto=format&fit=crop');
+      background-size: cover;
+      background-blend-mode: overlay;
+      background-attachment: fixed;
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       padding-top: env(safe-area-inset-top);
+      background: rgba(18, 14, 11, 0.92);
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
 
-    h1 {
+    .brand-group h1 {
       font-size: 1.35rem;
-      font-weight: 600;
+      font-weight: 800;
       letter-spacing: -0.02em;
+      color: var(--gold-light);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    }
+
+    .brand-group p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
     }
 
     .badge {
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid var(--gold);
       border-radius: 20px;
-      color: var(--accent);
-      backdrop-filter: blur(12px);
+      color: var(--gold-light);
+      box-shadow: 0 0 14px var(--gold-glow);
     }
 
-    /* Glassmorphism KPI Grid */
+    /* Hero Banner with TTRPG Illustration Asset */
+    .hero-banner {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 22px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-banner img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.8) sepia(0.25) saturate(1.2);
+      transition: transform 600ms var(--ease-out);
+    }
+
+    .hero-banner:hover img {
+      transform: scale(1.04);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(0deg, rgba(18,14,11,0.96) 0%, rgba(18,14,11,0.5) 75%, transparent 100%);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hero-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .hero-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* KPI Grid - Luminous Magical Cards */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
 
     .kpi-card {
-      background: var(--card-bg);
+      background: var(--bg-card);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
+      border-radius: 18px;
       padding: 16px;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      transition: transform 160ms var(--ease-out), border-color 200ms ease;
+      transition: transform 160ms var(--ease-out), border-color 200ms ease, box-shadow 200ms ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
 
     .kpi-card:active {
       transform: scale(0.97);
-      border-color: rgba(255, 178, 77, 0.3);
+      border-color: var(--card-border-hover);
+      box-shadow: 0 0 18px var(--gold-glow);
     }
 
     .kpi-label {
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
+      font-weight: 700;
     }
 
     .kpi-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text);
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--gold-light);
       letter-spacing: -0.03em;
-    }
-
-    .kpi-value span {
-      color: var(--accent);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
     }
 
     /* Sections */
     section {
-      margin-bottom: 28px;
+      margin-bottom: 26px;
     }
 
     h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--gold);
       margin-bottom: 12px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    h2::before {
+      content: '⚔️';
+      font-size: 0.9rem;
     }
 
     .list-container {
@@ -124,40 +205,55 @@
     }
 
     .list-item {
-      background: var(--card-bg);
+      background: var(--bg-card);
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: transform 160ms var(--ease-out);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 160ms var(--ease-out), border-color 200ms ease, box-shadow 200ms ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
 
     .list-item:active {
       transform: scale(0.98);
+      border-color: var(--card-border-hover);
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 62%;
     }
 
     .item-title {
-      font-size: 0.95krem;
-      font-weight: 500;
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .item-sub {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      margin-top: 2px;
     }
 
     .item-badge {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-glow);
-      padding: 4px 10px;
-      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--bg-deep);
+      background: var(--gold);
+      padding: 6px 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+      white-space: nowrap;
     }
 
     /* Stagger entry animation */
@@ -186,13 +282,28 @@
 <body>
 
   <header class="animate-in">
-    <h1>LudoMeter • Asnières</h1>
-    <div class="badge" id="status-badge">Live NAS</div>
+    <div class="brand-group">
+      <h1>LudoMeter</h1>
+      <p>Les Ludophiles d'Asnières</p>
+    </div>
+    <div class="badge" id="status-badge">⚡ Live NAS</div>
   </header>
 
+  <!-- Immersive TTRPG Hero Asset Banner -->
+  <div class="hero-banner animate-in delay-1">
+    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Tabletop RPG Dice & Tavern Atmosphere">
+    <div class="hero-overlay">
+      <div>
+        <div class="hero-title">Campagne Phare : Daggerheart</div>
+        <div class="hero-sub">L'Aube des Braves • Prochaine session</div>
+      </div>
+      <div style="font-size: 1.5rem;">🎲</div>
+    </div>
+  </div>
+
   <div class="kpi-grid">
-    <div class="kpi-card animate-in delay-1">
-      <div class="kpi-label">Séances</div>
+    <div class="kpi-card animate-in delay-2">
+      <div class="kpi-label">Séances Jouées</div>
       <div class="kpi-value" id="kpi-sessions">-</div>
     </div>
     <div class="kpi-card animate-in delay-2">
@@ -203,23 +314,35 @@
       <div class="kpi-label">Membres Actifs</div>
       <div class="kpi-value" id="kpi-members">-</div>
     </div>
-    <div class="kpi-card animate-in delay-4">
-      <div class="kpi-label">Top Jeu</div>
-      <div class="kpi-value" id="kpi-top" style="font-size: 1.1rem; padding-top: 6px;">-</div>
+    <div class="kpi-card animate-in delay-3">
+      <div class="kpi-label">Jeu Phare</div>
+      <div class="kpi-value" id="kpi-top" style="font-size: 1.05rem; padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
     </div>
   </div>
 
   <section class="animate-in delay-4">
     <h2>Campagnes & Jeux</h2>
     <div class="list-container" id="games-list">
-      <!-- Dynamically loaded -->
+      <div class="list-item">
+        <div class="item-info">
+          <div class="item-title">Invocation des tables...</div>
+          <div class="item-sub">Lecture du grimoire</div>
+        </div>
+        <div class="item-badge">...</div>
+      </div>
     </div>
   </section>
 
   <section class="animate-in delay-4">
-    <h2>Séances Récentes</h2>
+    <h2>Séances Récentes & À Venir</h2>
     <div class="list-container" id="sessions-list">
-      <!-- Dynamically loaded -->
+      <div class="list-item">
+        <div class="item-info">
+          <div class="item-title">Consultation des rouleaux...</div>
+          <div class="item-sub">Canal #organisation-tables</div>
+        </div>
+        <div class="item-badge">...</div>
+      </div>
     </div>
   </section>
 
@@ -235,23 +358,23 @@
           document.getElementById('kpi-members').innerText = data.kpis.activeMembers;
           document.getElementById('kpi-top').innerText = data.kpis.topGame;
 
-          // Populate games cleanly (Fixed template literal escaping bug)
+          // Populate games
           const gamesContainer = document.getElementById('games-list');
           if (data.games && data.games.length > 0) {
             gamesContainer.innerHTML = data.games.map(g => `
               <div class="list-item">
                 <div class="item-info">
                   <div class="item-title">${g.name}</div>
-                  <div class="item-sub">${g.players || 4} joueurs actifs</div>
+                  <div class="item-sub">${g.status || (g.players + ' joueurs actifs')}</div>
                 </div>
-                <div class="item-badge">${g.sessions} séances</div>
+                <div class="item-badge">${g.sessions > 0 ? g.sessions + ' séances' : 'Bientôt'}</div>
               </div>
             `).join('');
           } else {
-            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne</div></div></div>';
+            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne active</div></div></div>';
           }
 
-          // Populate recent sessions cleanly
+          // Populate recent sessions
           const sessionsContainer = document.getElementById('sessions-list');
           if (data.recentSessions && data.recentSessions.length > 0) {
             sessionsContainer.innerHTML = data.recentSessions.map(s => `
@@ -269,7 +392,8 @@
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
-        document.getElementById('status-badge').innerText = 'Offline Mode';
+        document.getElementById('status-badge').innerText = '⚠️ Mode Hors-Ligne';
+        document.getElementById('status-badge').style.borderColor = '#ff4d4d';
         document.getElementById('status-badge').style.color = '#ff4d4d';
       }
     }

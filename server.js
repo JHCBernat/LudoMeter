@@ -29,18 +29,18 @@ async function checkAndSyncData() {
       const initialData = {
         association: "Les Ludophiles d'Asnières et d'ailleurs",
         games: [
-          { name: "Fading Suns", sessions: 12, players: 5 },
-          { name: "Traveller", sessions: 8, players: 4 },
-          { name: "Alien", sessions: 6, players: 4 },
-          { name: "Daggerheart", sessions: 10, players: 6 },
-          { name: "L5R", sessions: 7, players: 5 }
+          { name: "Daggerheart", sessions: 0, players: 5, status: "1ère séance bientôt" },
+          { name: "L'Appel de Cthulhu", sessions: 14, players: 5 },
+          { name: "Donjons & Dragons 5E", sessions: 22, players: 6 },
+          { name: "Chroniques Oubliées", sessions: 8, players: 4 },
+          { name: "Soirées Jeux de Plateau", sessions: 35, players: 18 }
         ],
-        sessionsTotal: 43,
-        activeMembers: 24,
+        sessionsTotal: 79,
+        activeMembers: 32,
         recentSessions: [
-          { title: "Fading Suns: La Grande Menace #12", date: "2026-10-28", gm: "Julien", game: "Fading Suns" },
-          { title: "Traveller: Les Étoiles Mortes #8", date: "2026-10-25", gm: "Marc", game: "Traveller" },
-          { title: "Alien: Isolation Lunaire #6", date: "2026-10-22", gm: "Thomas", game: "Alien" }
+          { title: "Daggerheart: L'Aube des Braves #0 (Préparation)", date: "Prochainement", gm: "Julien", game: "Daggerheart" },
+          { title: "L'Appel de Cthulhu: Les Masques #14", date: "24 Oct 2026", gm: "Thomas", game: "L'Appel de Cthulhu" },
+          { title: "D&D 5E: La Malédiction de Strahd #22", date: "20 Oct 2026", gm: "Marc", game: "Donjons & Dragons 5E" }
         ]
       };
       fs.writeFileSync(historyPath, JSON.stringify(initialData, null, 2), 'utf8');
