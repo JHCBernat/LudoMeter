@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  jdr-kpi:
+    build: .
+    container_name: jdr-kpi-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    volumes:
+      - /volume1/docker/hermes/data:/app/data
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

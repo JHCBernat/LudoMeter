@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JdR92 • KPI Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#05060a">
+  <style>
+    :root {
+      --bg: #05060a;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f4f1ea;
+      --text-muted: #8b8f98;
+      --accent: #ffb24d;
+      --accent-glow: rgba(255, 178, 77, 0.15);
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 16px env(safe-area-inset-bottom);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 178, 77, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(138, 107, 255, 0.04) 0%, transparent 40%);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-top: env(safe-area-inset-top);
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      color: var(--accent);
+      backdrop-filter: blur(12px);
+    }
+
+    /* Glassmorphism KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 160ms var(--ease-out), border-color 200ms ease;
+    }
+
+    .kpi-card:active {
+      transform: scale(0.97);
+      border-color: rgba(255, 178, 77, 0.3);
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .kpi-value span {
+      color: var(--accent);
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .list-item:active {
+      transform: scale(0.98);
+    }
+
+    .item-title {
+      font-size: 0.95krem;
+      font-weight: 500;
+    }
+
+    .item-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .item-badge {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 4px 10px;
+      border-radius: 10px;
+    }
+
+    /* Stagger entry animation */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeUp 350ms var(--ease-out) forwards;
+      opacity: 0;
+    }
+
+    .delay-1 { animation-delay: 50ms; }
+    .delay-2 { animation-delay: 100ms; }
+    .delay-3 { animation-delay: 150ms; }
+    .delay-4 { animation-delay: 200ms; }
+  </style>
+</head>
+<body>
+
+  <header class="animate-in">
+    <h1>JdR92 • Analytics</h1>
+    <div class="badge" id="status-badge">Live NAS</div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi-card animate-in delay-1">
+      <div class="kpi-label">Séances</div>
+      <div class="kpi-value" id="kpi-sessions">-</div>
+    </div>
+    <div class="kpi-card animate-in delay-2">
+      <div class="kpi-label">Campagnes</div>
+      <div class="kpi-value" id="kpi-games">-</div>
+    </div>
+    <div class="kpi-card animate-in delay-3">
+      <div class="kpi-label">Membres Actifs</div>
+      <div class="kpi-value" id="kpi-members">-</div>
+    </div>
+    <div class="kpi-card animate-in delay-4">
+      <div class="kpi-label">Top Jeu</div>
+      <div class="kpi-value" id="kpi-top" style="font-size: 1.1rem; padding-top: 6px;">-</div>
+    </div>
+  </div>
+
+  <section class="animate-in delay-4">
+    <h2>Campagnes & Jeux</h2>
+    <div class="list-container" id="games-list">
+      <!-- Dynamically loaded -->
+    </div>
+  </section>
+
+  <section class="animate-in delay-4">
+    <h2>Séances Récentes</h2>
+    <div class="list-container" id="sessions-list">
+      <!-- Dynamically loaded -->
+    </div>
+  </section>
+
+  <script>
+    async function loadData() {
+      try {
+        const res = await fetch('/api/kpis');
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('kpi-sessions').innerText = data.kpis.totalSessions;
+          document.getElementById('kpi-games').innerText = data.kpis.totalGames;
+          document.getElementById('kpi-members').innerText = data.kpis.activeMembers;
+          document.getElementById('kpi-top').innerText = data.kpis.topGame;
+
+          // Populate games
+          const gamesContainer = document.getElementById('games-list');
+          gamesContainer.innerHTML = data.games.map(g => `
+            <div class="list-item">
+              <div>
+                <div class="item-title">\${g.name}</div>
+                <div class="item-sub">\${g.players || 4} joueurs actifs</div>
+              </div>
+              <div class="item-badge">\${g.sessions} séances</div>
+            </div>
+          `).join('');
+
+          // Populate recent sessions
+          const sessionsContainer = document.getElementById('sessions-list');
+          sessionsContainer.innerHTML = data.recentSessions.map(s => `
+            <div class="list-item">
+              <div>
+                <div class="item-title">\${s.title}</div>
+                <div class="item-sub">MJ : \${s.gm} • \${s.date}</div>
+              </div>
+              <div class="item-badge">\${s.game}</div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+        document.getElementById('status-badge').innerText = 'Offline Mode';
+        document.getElementById('status-badge').style.color = '#ff4d4d';
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
