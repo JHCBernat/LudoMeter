@@ -235,29 +235,37 @@
           document.getElementById('kpi-members').innerText = data.kpis.activeMembers;
           document.getElementById('kpi-top').innerText = data.kpis.topGame;
 
-          // Populate games
+          // Populate games cleanly (Fixed template literal escaping bug)
           const gamesContainer = document.getElementById('games-list');
-          gamesContainer.innerHTML = data.games.map(g => `
-            <div class="list-item">
-              <div>
-                <div class="item-title">\${g.name}</div>
-                <div class="item-sub">\${g.players || 4} joueurs actifs</div>
+          if (data.games && data.games.length > 0) {
+            gamesContainer.innerHTML = data.games.map(g => `
+              <div class="list-item">
+                <div class="item-info">
+                  <div class="item-title">${g.name}</div>
+                  <div class="item-sub">${g.players || 4} joueurs actifs</div>
+                </div>
+                <div class="item-badge">${g.sessions} séances</div>
               </div>
-              <div class="item-badge">\${g.sessions} séances</div>
-            </div>
-          `).join('');
+            `).join('');
+          } else {
+            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne</div></div></div>';
+          }
 
-          // Populate recent sessions
+          // Populate recent sessions cleanly
           const sessionsContainer = document.getElementById('sessions-list');
-          sessionsContainer.innerHTML = data.recentSessions.map(s => `
-            <div class="list-item">
-              <div>
-                <div class="item-title">\${s.title}</div>
-                <div class="item-sub">MJ : \${s.gm} • \${s.date}</div>
+          if (data.recentSessions && data.recentSessions.length > 0) {
+            sessionsContainer.innerHTML = data.recentSessions.map(s => `
+              <div class="list-item">
+                <div class="item-info">
+                  <div class="item-title">${s.title}</div>
+                  <div class="item-sub">MJ : ${s.gm} • ${s.date}</div>
+                </div>
+                <div class="item-badge">${s.game}</div>
               </div>
-              <div class="item-badge">\${s.game}</div>
-            </div>
-          `).join('');
+            `).join('');
+          } else {
+            sessionsContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune séance récente</div></div></div>';
+          }
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
