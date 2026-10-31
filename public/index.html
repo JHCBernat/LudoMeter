@@ -418,6 +418,13 @@
       }
     }
 
+    function toggleSession(idx) {
+      const el = document.getElementById(`session-tables-${idx}`);
+      if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
     async function loadData() {
       try {
         console.log('[LudoMeter Frontend] 🔄 Fetching KPI & Agenda data from /api/kpis...');
@@ -459,32 +466,38 @@
             gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne</div></div></div>';
           }
 
-          // Populate Wednesday sessions from discord_sessions_history.json (#jdr-agenda)
+          // Populate Wednesday sessions with collapsible accordions
           const wednesdayContainer = document.getElementById('wednesday-list');
           if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
-            wednesdayContainer.innerHTML = data.wednesdaySessions.map(s => `
-              <div class="list-item" style="flex-direction: column; align-items: stretch;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <div class="item-title" style="color: var(--gold-light);">${s.title}</div>
+            wednesdayContainer.innerHTML = data.wednesdaySessions.map((s, idx) => `
+              <div class="list-item" style="flex-direction: column; align-items: stretch; cursor: pointer;" onclick="toggleSession(${idx})">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div class="item-title" style="color: var(--gold-light);">${s.title}</div>
+                    <div class="item-sub">📅 ${s.date} • Cliquer pour ${s.tablesCount > 0 ? 'voir les tables' : 'détails'}</div>
+                  </div>
                   <div class="item-badge">${s.tablesCount} table(s)</div>
                 </div>
-                <div class="item-sub">Date : ${s.date}</div>
-                ${s.tables.map(t => `
-                  <div class="table-card">
-                    <div class="table-header">
-                      <span>Table #${t.num} : ${t.game}</span>
+                <div id="session-tables-${idx}" style="display: none; margin-top: 10px; border-top: 1px solid rgba(212,175,55,0.2); padding-top: 8px;">
+                  ${s.tables && s.tables.length > 0 ? s.tables.map(t => `
+                    <div class="table-card">
+                      <div class="table-header">
+                        <span>Table #${t.num} : ${t.game}</span>
+                      </div>
+                      <div class="table-participants">
+                        ${t.mj}<br>
+                        👥 <strong>${t.participants.filter(p => !p.toLowerCase().includes('mj')).length}</strong> joueur(s) inscrits
+                        <div style="margin-top: 4px; font-size: 0.7rem; opacity: 0.8;">
+                          ${t.participants.join(' • ')}
+                        </div>
+                      </div>
                     </div>
-                    <div class="table-participants">
-                      ${t.mj}<br>
-                      👥 ${t.participants.filter(p => !p.toLowerCase().includes('mj')).length} joueur(s) inscrits
-                    </div>
-                  </div>
-                `).join('')}
+                  `).join('') : '<div class="item-sub" style="margin-top: 6px;">Aucune table enregistrée pour cette session.</div>'}
+                </div>
               </div>
             `).join('');
           } else {
             wednesdayContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune session de mercredi trouvée dans l\'agenda</div></div></div>';
-          }
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
