@@ -434,14 +434,14 @@
         console.log('[LudoMeter Frontend] 📥 API Response received:', data);
         console.log('[LudoMeter Frontend] 🔌 Data Source:', data.source);
 
-        // Update status badge based on whether data came from live Discord API or local cache
+        // Update status badge with last sync timestamp & source status
         const statusBadge = document.getElementById('status-badge');
-        if (data.source === 'discord-live') {
-          statusBadge.innerText = '🟢 Discord Live';
+        if (data.success && data.lastSync) {
+          statusBadge.innerText = `🟢 Sync à ${data.lastSync}`;
           statusBadge.style.color = '#76ff03';
         } else {
-          statusBadge.innerText = '📦 Local Cache';
-          statusBadge.style.color = '#ffb24d';
+          statusBadge.innerText = '⚠️ Échec Sync';
+          statusBadge.style.color = '#ff4d4d';
         }
 
         if (data.success) {

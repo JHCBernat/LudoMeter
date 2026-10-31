@@ -102,6 +102,7 @@ async function fetchLudophilesData() {
     return {
       success: true,
       source: 'discord-live-ludophiles',
+      lastSync: lastSyncStatus.time || '13:00',
       association: "Les Ludophiles d'Asnières et d'ailleurs",
       kpis: {
         totalSessions: sessionsList.length,
