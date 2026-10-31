@@ -420,9 +420,23 @@
 
     async function loadData() {
       try {
+        console.log('[LudoMeter Frontend] 🔄 Fetching KPI & Agenda data from /api/kpis...');
         const res = await fetch('/api/kpis');
         const data = await res.json();
         
+        console.log('[LudoMeter Frontend] 📥 API Response received:', data);
+        console.log('[LudoMeter Frontend] 🔌 Data Source:', data.source);
+
+        // Update status badge based on whether data came from live Discord API or local cache
+        const statusBadge = document.getElementById('status-badge');
+        if (data.source === 'discord-live') {
+          statusBadge.innerText = '🟢 Discord Live';
+          statusBadge.style.color = '#76ff03';
+        } else {
+          statusBadge.innerText = '📦 Local Cache';
+          statusBadge.style.color = '#ffb24d';
+        }
+
         if (data.success) {
           document.getElementById('kpi-sessions').innerText = data.kpis.totalSessions;
           document.getElementById('kpi-games').innerText = data.kpis.totalGames;

@@ -89,8 +89,11 @@ async function fetchDiscordChannelData() {
 app.get('/api/kpis', async (req, res) => {
   try {
     let rawData = await fetchDiscordChannelData();
+    let isLive = true;
 
     if (!rawData || !rawData.sessions || rawData.sessions.length === 0) {
+      isLive = false;
+      console.log('[LudoMeter] 📦 Falling back to local cache file...');
       if (fs.existsSync(historyPath)) {
         rawData = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
       } else {
@@ -112,6 +115,8 @@ app.get('/api/kpis', async (req, res) => {
           ]
         };
       }
+    } else {
+      console.log('[LudoMeter] 🟢 Successfully serving LIVE Discord data!');
     }
 
     const sessionsList = rawData.sessions || [];
@@ -152,6 +157,7 @@ app.get('/api/kpis', async (req, res) => {
 
     res.json({
       success: true,
+      source: isLive ? 'discord-live' : 'local-cache',
       association: "Les Ludophiles d'Asnières et d'ailleurs",
       kpis: {
         totalSessions,
