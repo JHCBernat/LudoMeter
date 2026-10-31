@@ -59,7 +59,24 @@ async function fetchLudophilesData() {
     const allItems = [...(activeThreadsData.threads || []), ...agendaMessages, ...orgMessages];
     
     allItems.forEach(item => {
-      const content = item.content || item.name || "";
+      // Extract raw texts from content, name, and embeds
+      let rawTexts = [];
+      if (item.content) rawTexts.push(item.content);
+      if (item.name) rawTexts.push(item.name);
+      if (item.embeds && Array.isArray(item.embeds)) {
+        item.embeds.forEach(emb => {
+          if (emb.title) rawTexts.push(emb.title);
+          if (emb.description) rawTexts.push(emb.description);
+          if (emb.fields && Array.isArray(emb.fields)) {
+            emb.fields.forEach(f => {
+              if (f.name) rawTexts.push(f.name);
+              if (f.value) rawTexts.push(f.value);
+            });
+          }
+        });
+      }
+
+      const content = rawTexts.join('\n').trim();
       if (content.length > 2 && !content.toLowerCase().includes('http')) {
         const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Prochainement";
         const threadId = item.id || item.thread_id || Math.random().toString();
