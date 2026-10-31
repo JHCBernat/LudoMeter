@@ -60,34 +60,49 @@ async function fetchLudophilesData() {
     
     allItems.forEach(item => {
       const content = item.content || item.name || "";
-      if (content.length > 2) {
+      if (content.length > 2 && !content.toLowerCase().includes('http')) {
         const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Prochainement";
         const threadId = item.id || item.thread_id || Math.random().toString();
 
         const lines = content.split('\n');
-        const mainTitle = lines[0].replace(/\*\*/g, '').trim();
+        const sessionTitle = lines[0].replace(/\*\*/g, '').trim();
+
+        const tables = [];
+        let currentTable = { table_num: 1, game_name: sessionTitle, mj: "👑 MJ: Association", participants: [] };
+
+        lines.slice(1).forEach(line => {
+          const cleanLine = line.replace(/\*\*/g, '').trim();
+          if (cleanLine.length > 2) {
+            if (cleanLine.toLowerCase().includes('mj') || cleanLine.includes('👑')) {
+              currentTable.mj = cleanLine;
+            } else if (cleanLine.startsWith('-') || cleanLine.startsWith('•') || cleanLine.toLowerCase().includes('table')) {
+              if (currentTable.game_name && currentTable.game_name !== sessionTitle) {
+                tables.push(currentTable);
+                currentTable = { table_num: tables.length + 1, game_name: cleanLine, mj: "👑 MJ: Association", participants: [] };
+              } else {
+                currentTable.game_name = cleanLine;
+              }
+            } else {
+              currentTable.participants.push(cleanLine);
+            }
+          }
+        });
+
+        if (tables.length === 0) {
+          tables.push(currentTable);
+        }
 
         if (!sessionsMap[threadId]) {
           sessionsMap[threadId] = {
-            title: mainTitle || "Session JDR",
+            title: sessionTitle || "Session JDR",
             date: dateStr,
             thread_id: threadId,
-            tables: lines.slice(1).length > 0 ? lines.slice(1).map((l, idx) => ({
-              table_num: idx + 1,
-              game_name: l.replace(/\*\*/g, '').trim() || mainTitle,
-              participants: ["👑 MJ: Association", "🪑 Inscriptions ouvertes"]
-            })) : [
-              {
-                table_num: 1,
-                game_name: mainTitle,
-                participants: ["👑 MJ: Association", "🪑 Inscriptions ouvertes"]
-              }
-            ]
+            tables
           };
         }
 
-        if (mainTitle && mainTitle.length > 2 && !mainTitle.toLowerCase().includes('http')) {
-          gameCounts[mainTitle] = (gameCounts[mainTitle] || 0) + 1;
+        if (sessionTitle && sessionTitle.length > 2) {
+          gameCounts[sessionTitle] = (gameCounts[sessionTitle] || 0) + 1;
         }
       }
     });
