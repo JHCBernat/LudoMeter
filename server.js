@@ -17,6 +17,21 @@ const AGENDA_CHANNEL_ID = process.env.DISCORD_CHANNEL_AGENDA_ID || "131823755921
 // Local fallback history path
 const historyPath = process.env.DISCORD_HISTORY_PATH || path.join(__dirname, 'data', 'discord_sessions_history.json');
 
+// Smart path resolution for Discord sessions history (Docker / NAS Gateway / Local)
+function getHistoryPath() {
+  const possiblePaths = [
+    process.env.DISCORD_HISTORY_PATH,
+    '/app/data/discord_sessions_history.json',
+    '/h/data/discord_sessions_history.json',
+    path.join(__dirname, 'data', 'discord_sessions_history.json')
+  ].filter(Boolean);
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return path.join(__dirname, 'data', 'discord_sessions_history.json');
+}
+
 // Helper to fetch live upcoming threads/messages from Discord API
 async function fetchLiveDiscordAgenda() {
   if (!DISCORD_TOKEN) return [];
