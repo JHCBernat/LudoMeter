@@ -9,12 +9,25 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Path to Discord sessions history (synced from #organisation-tables)
-const historyPath = process.env.DISCORD_HISTORY_PATH || path.join(__dirname, 'data', 'discord_sessions_history.json');
+// Smart path resolution for Discord sessions history (Docker / NAS Gateway / Local)
+function getHistoryPath() {
+  const possiblePaths = [
+    process.env.DISCORD_HISTORY_PATH,
+    '/app/data/discord_sessions_history.json',
+    '/h/data/discord_sessions_history.json',
+    path.join(__dirname, 'data', 'discord_sessions_history.json')
+  ].filter(Boolean);
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return path.join(__dirname, 'data', 'discord_sessions_history.json');
+}
 
 // Function to perform immediate sync check on startup and daily
 async function checkAndSyncData() {
-  console.log('[LudoMeter] 🔄 Running Discord data check for "Les Ludophiles d\'Asnières"...');
+  const historyPath = getHistoryPath();
+  console.log(`[LudoMeter] 🔄 Running Discord data check for "Les Ludophiles d'Asnières" (Path: ${historyPath})...`);
   try {
     const dataDir = path.dirname(historyPath);
     if (!fs.existsSync(dataDir)) {
@@ -31,16 +44,12 @@ async function checkAndSyncData() {
         games: [
           { name: "Daggerheart", sessions: 0, players: 5, status: "1ère séance bientôt" },
           { name: "L'Appel de Cthulhu", sessions: 14, players: 5 },
-          { name: "Donjons & Dragons 5E", sessions: 22, players: 6 },
-          { name: "Chroniques Oubliées", sessions: 8, players: 4 },
-          { name: "Soirées Jeux de Plateau", sessions: 35, players: 18 }
+          { name: "Donjons & Dragons 5E", sessions: 22, players: 6 }
         ],
-        sessionsTotal: 79,
+        sessionsTotal: 36,
         activeMembers: 32,
         recentSessions: [
-          { title: "Daggerheart: L'Aube des Braves #0 (Préparation)", date: "Prochainement", gm: "Julien", game: "Daggerheart" },
-          { title: "L'Appel de Cthulhu: Les Masques #14", date: "24 Oct 2026", gm: "Thomas", game: "L'Appel de Cthulhu" },
-          { title: "D&D 5E: La Malédiction de Strahd #22", date: "20 Oct 2026", gm: "Marc", game: "Donjons & Dragons 5E" }
+          { title: "Mercredi 28 octobre", date: "28 octobre", tables: [{ table_num: 1, game_name: "Kult", participants: ["👑 MJ", "🪑 Joueur"] }] }
         ]
       };
       fs.writeFileSync(historyPath, JSON.stringify(initialData, null, 2), 'utf8');
@@ -60,14 +69,51 @@ setInterval(checkAndSyncData, TWENTY_FOUR_HOURS);
 // Secure API endpoint: Credentials stay 100% server-side
 app.get('/api/kpis', (req, res) => {
   try {
+    const historyPath = getHistoryPath();
     let rawData = { sessions: [], members: [], games: [] };
     if (fs.existsSync(historyPath)) {
       rawData = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
     }
 
-    const totalSessions = rawData.sessionsTotal || (rawData.games ? rawData.games.reduce((acc, g) => acc + (g.sessions || 0), 0) : 0);
-    const totalGames = rawData.games ? rawData.games.length : 0;
-    const activeMembers = rawData.activeMembers || 24;
+    const sessionsList = rawData.sessions || [];
+
+    // Extract unique games & count occurrences from actual gateway tables
+    const gameCounts = {};
+    sessionsList.forEach(session => {
+      if (session.tables) {
+        session.tables.forEach(table => {
+          let gName = table.game_name ? table.game_name.replace(/\*\*/g, '').trim() : "Autre";
+          if (gName && gName.toLowerCase() !== "système" && gName.length > 1) {
+            gameCounts[gName] = (gameCounts[gName] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const gamesArray = Object.keys(gameCounts).map(name => ({
+      name,
+      sessions: gameCounts[name],
+      players: 4
+    })).sort((a, b) => b.sessions - a.sessions);
+
+    // Filter Wednesday sessions specifically from #jdr-agenda / threads starting with "Mercredi"
+    const wednesdaySessions = sessionsList
+      .filter(s => s.thread_name && s.thread_name.toLowerCase().includes('mercredi'))
+      .map(s => ({
+        title: s.thread_name,
+        date: s.date,
+        tablesCount: s.tables ? s.tables.length : 0,
+        tables: (s.tables || []).map(t => ({
+          num: t.table_num,
+          game: t.game_name ? t.game_name.replace(/\*\*/g, '').trim() : "Table JDR",
+          mj: (t.participants || []).find(p => p.toLowerCase().includes('mj')) || "MJ à définir",
+          participants: t.participants || []
+        }))
+      }));
+
+    const totalSessions = sessionsList.length || (rawData.sessionsTotal || 36);
+    const totalGames = gamesArray.length || (rawData.games ? rawData.games.length : 3);
+    const topGame = gamesArray.length > 0 ? gamesArray[0].name : (rawData.games?.[0]?.name || "Warhammer");
 
     res.json({
       success: true,
@@ -75,13 +121,12 @@ app.get('/api/kpis', (req, res) => {
       kpis: {
         totalSessions,
         totalGames,
-        activeMembers,
-        topGame: rawData.games && rawData.games.length > 0 
-          ? rawData.games.sort((a,b) => b.sessions - a.sessions)[0]?.name 
-          : "N/A"
+        activeMembers: rawData.activeMembers || 32,
+        topGame
       },
-      games: rawData.games || [],
-      recentSessions: rawData.recentSessions || []
+      games: gamesArray.length > 0 ? gamesArray : (rawData.games || []),
+      wednesdaySessions,
+      recentSessions: wednesdaySessions.length > 0 ? wednesdaySessions : (rawData.recentSessions || [])
     });
   } catch (err) {
     console.error('Error fetching KPIs:', err);

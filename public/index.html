@@ -204,18 +204,66 @@
       gap: 10px;
     }
 
-    .list-item {
-      background: var(--bg-card);
-      border: 1px solid var(--card-border);
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(18, 14, 11, 0.8);
+      padding: 6px;
       border-radius: 16px;
-      padding: 14px 16px;
+      border: 1px solid var(--card-border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 200ms var(--ease-out);
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: var(--gold);
+      color: var(--bg-deep);
+      box-shadow: 0 2px 12px var(--gold-glow);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .table-card {
+      background: rgba(18, 14, 11, 0.6);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+
+    .table-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition: transform 160ms var(--ease-out), border-color 200ms ease, box-shadow 200ms ease;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    .table-participants {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
     .list-item:active {
@@ -289,64 +337,87 @@
     <div class="badge" id="status-badge">⚡ Live NAS</div>
   </header>
 
-  <!-- Immersive TTRPG Hero Asset Banner -->
-  <div class="hero-banner animate-in delay-1">
-    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Tabletop RPG Dice & Tavern Atmosphere">
-    <div class="hero-overlay">
-      <div>
-        <div class="hero-title">Campagne Phare : Daggerheart</div>
-        <div class="hero-sub">L'Aube des Braves • Prochaine session</div>
-      </div>
-      <div style="font-size: 1.5rem;">🎲</div>
-    </div>
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav animate-in delay-1">
+    <button class="tab-btn active" onclick="switchTab('stats')">📊 Statistiques</button>
+    <button class="tab-btn" onclick="switchTab('wednesdays')">🗓️ Mercredis JDR</button>
   </div>
 
-  <div class="kpi-grid">
-    <div class="kpi-card animate-in delay-2">
-      <div class="kpi-label">Séances Jouées</div>
-      <div class="kpi-value" id="kpi-sessions">-</div>
+  <!-- TAB 1: STATS & GAMES -->
+  <div id="tab-stats" class="tab-pane active animate-in delay-2">
+    <!-- Immersive TTRPG Hero Asset Banner -->
+    <div class="hero-banner">
+      <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Tabletop RPG Dice & Tavern Atmosphere">
+      <div class="hero-overlay">
+        <div>
+          <div class="hero-title">Campagne Phare : Daggerheart</div>
+          <div class="hero-sub">L'Aube des Braves • Prochaine session</div>
+        </div>
+        <div style="font-size: 1.5rem;">🎲</div>
+      </div>
     </div>
-    <div class="kpi-card animate-in delay-2">
-      <div class="kpi-label">Campagnes</div>
-      <div class="kpi-value" id="kpi-games">-</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Séances Jouées</div>
+        <div class="kpi-value" id="kpi-sessions">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Campagnes</div>
+        <div class="kpi-value" id="kpi-games">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Membres Actifs</div>
+        <div class="kpi-value" id="kpi-members">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Jeu Phare</div>
+        <div class="kpi-value" id="kpi-top" style="font-size: 1.05rem; padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+      </div>
     </div>
-    <div class="kpi-card animate-in delay-3">
-      <div class="kpi-label">Membres Actifs</div>
-      <div class="kpi-value" id="kpi-members">-</div>
-    </div>
-    <div class="kpi-card animate-in delay-3">
-      <div class="kpi-label">Jeu Phare</div>
-      <div class="kpi-value" id="kpi-top" style="font-size: 1.05rem; padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
-    </div>
+
+    <section>
+      <h2>Campagnes & Jeux</h2>
+      <div class="list-container" id="games-list">
+        <div class="list-item">
+          <div class="item-info">
+            <div class="item-title">Invocation des tables...</div>
+            <div class="item-sub">Lecture du grimoire</div>
+          </div>
+          <div class="item-badge">...</div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <section class="animate-in delay-4">
-    <h2>Campagnes & Jeux</h2>
-    <div class="list-container" id="games-list">
-      <div class="list-item">
-        <div class="item-info">
-          <div class="item-title">Invocation des tables...</div>
-          <div class="item-sub">Lecture du grimoire</div>
+  <!-- TAB 2: WEDNESDAY SESSIONS FROM JDR-AGENDA -->
+  <div id="tab-wednesdays" class="tab-pane animate-in delay-2">
+    <section>
+      <h2>Prochaines Sessions du Mercredi (#jdr-agenda)</h2>
+      <div class="list-container" id="wednesday-list">
+        <div class="list-item">
+          <div class="item-info">
+            <div class="item-title">Consultation du grimoire d'agenda...</div>
+          </div>
         </div>
-        <div class="item-badge">...</div>
       </div>
-    </div>
-  </section>
-
-  <section class="animate-in delay-4">
-    <h2>Séances Récentes & À Venir</h2>
-    <div class="list-container" id="sessions-list">
-      <div class="list-item">
-        <div class="item-info">
-          <div class="item-title">Consultation des rouleaux...</div>
-          <div class="item-sub">Canal #organisation-tables</div>
-        </div>
-        <div class="item-badge">...</div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+      if (tabName === 'stats') {
+        document.querySelector('.tabs-nav button:nth-child(1)').classList.add('active');
+        document.getElementById('tab-stats').classList.add('active');
+      } else {
+        document.querySelector('.tabs-nav button:nth-child(2)').classList.add('active');
+        document.getElementById('tab-wednesdays').classList.add('active');
+      }
+    }
+
     async function loadData() {
       try {
         const res = await fetch('/api/kpis');
@@ -365,29 +436,40 @@
               <div class="list-item">
                 <div class="item-info">
                   <div class="item-title">${g.name}</div>
-                  <div class="item-sub">${g.status || (g.players + ' joueurs actifs')}</div>
+                  <div class="item-sub">${g.sessions} sessions enregistrées</div>
                 </div>
-                <div class="item-badge">${g.sessions > 0 ? g.sessions + ' séances' : 'Bientôt'}</div>
+                <div class="item-badge">Actif</div>
               </div>
             `).join('');
           } else {
-            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne active</div></div></div>';
+            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne</div></div></div>';
           }
 
-          // Populate recent sessions
-          const sessionsContainer = document.getElementById('sessions-list');
-          if (data.recentSessions && data.recentSessions.length > 0) {
-            sessionsContainer.innerHTML = data.recentSessions.map(s => `
-              <div class="list-item">
-                <div class="item-info">
-                  <div class="item-title">${s.title}</div>
-                  <div class="item-sub">MJ : ${s.gm} • ${s.date}</div>
+          // Populate Wednesday sessions from discord_sessions_history.json (#jdr-agenda)
+          const wednesdayContainer = document.getElementById('wednesday-list');
+          if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
+            wednesdayContainer.innerHTML = data.wednesdaySessions.map(s => `
+              <div class="list-item" style="flex-direction: column; align-items: stretch;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <div class="item-title" style="color: var(--gold-light);">${s.title}</div>
+                  <div class="item-badge">${s.tablesCount} table(s)</div>
                 </div>
-                <div class="item-badge">${s.game}</div>
+                <div class="item-sub">Date : ${s.date}</div>
+                ${s.tables.map(t => `
+                  <div class="table-card">
+                    <div class="table-header">
+                      <span>Table #${t.num} : ${t.game}</span>
+                    </div>
+                    <div class="table-participants">
+                      ${t.mj}<br>
+                      👥 ${t.participants.filter(p => !p.toLowerCase().includes('mj')).length} joueur(s) inscrits
+                    </div>
+                  </div>
+                `).join('')}
               </div>
             `).join('');
           } else {
-            sessionsContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune séance récente</div></div></div>';
+            wednesdayContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune session de mercredi trouvée dans l\'agenda</div></div></div>';
           }
         }
       } catch (err) {
