@@ -1,7 +1,18 @@
 # LudoMeter 🎲
 
-Dashboard KPI et PWA pour l'association **Les Ludophiles d'Asnières et d'ailleurs** (JdR92).
+Dashboard KPI et PWA pour l'association **Les Ludophiles d'Asnières et d'ailleurs**.
 Conçu pour Samsung Galaxy S23 (Android) et hébergé sur NAS Synology via Docker.
+
+---
+
+## 🏛️ Architecture & Synchro sans Bot (Gateway NAS)
+
+Puisque tu es modérateur (et non admin) sur le serveur Discord des Ludophiles, **aucune installation de bot n'est requise** sur ce serveur. 
+
+L'application **LudoMeter** exploite directement le travail de fond de ton **Hermes Gateway** sur le NAS Synology :
+1. Elle se connecte au volume partagé du Gateway (`/volume1/docker/hermes/data`).
+2. Elle lit l'historique et les recaps agrégés par la tâche de surveillance des parties JDR (`discord_sessions_history.json`).
+3. Aucun token bot n'est nécessaire sur le serveur des Ludophiles : tout est récupéré et sécurisé en interne sur le NAS.
 
 ---
 
