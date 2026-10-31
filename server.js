@@ -9,18 +9,25 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Secure API endpoint: Credentials stay 100% server-side
-app.get('/api/kpis', (req, res) => {
+// Path to Discord sessions history (synced from #organisation-tables)
+const historyPath = process.env.DISCORD_HISTORY_PATH || path.join(__dirname, 'data', 'discord_sessions_history.json');
+
+// Function to perform immediate sync check on startup and daily
+async function checkAndSyncData() {
+  console.log('[LudoMeter] 🔄 Running Discord data check for "Les Ludophiles d\'Asnières"...');
   try {
-    // Path to shared Discord sessions history on NAS volume or local test
-    const historyPath = path.join(__dirname, 'data', 'discord_sessions_history.json');
-    
-    let rawData = { sessions: [], members: [], games: [] };
+    const dataDir = path.dirname(historyPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
     if (fs.existsSync(historyPath)) {
-      rawData = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
+      const stats = fs.statSync(historyPath);
+      console.log(`[LudoMeter] ✅ History file active. Last modified: ${stats.mtime}`);
     } else {
-      // Default sample data matching JdR92 context if file doesn't exist yet
-      rawData = {
+      console.log('[LudoMeter] ⚠️ History file not found. Initializing sample dataset...');
+      const initialData = {
+        association: "Les Ludophiles d'Asnières et d'ailleurs",
         games: [
           { name: "Fading Suns", sessions: 12, players: 5 },
           { name: "Traveller", sessions: 8, players: 4 },
@@ -36,22 +43,44 @@ app.get('/api/kpis', (req, res) => {
           { title: "Alien: Isolation Lunaire #6", date: "2026-10-22", gm: "Thomas", game: "Alien" }
         ]
       };
+      fs.writeFileSync(historyPath, JSON.stringify(initialData, null, 2), 'utf8');
+    }
+  } catch (err) {
+    console.error('[LudoMeter] ❌ Error during sync check:', err);
+  }
+}
+
+// 1. Check immediately upon startup
+checkAndSyncData();
+
+// 2. Schedule daily check (every 24 hours)
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+setInterval(checkAndSyncData, TWENTY_FOUR_HOURS);
+
+// Secure API endpoint: Credentials stay 100% server-side
+app.get('/api/kpis', (req, res) => {
+  try {
+    let rawData = { sessions: [], members: [], games: [] };
+    if (fs.existsSync(historyPath)) {
+      rawData = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
     }
 
-    // Compute KPIs securely on server
-    const totalSessions = rawData.sessionsTotal || rawData.games.reduce((acc, g) => acc + (g.sessions || 0), 0);
-    const totalGames = rawData.games.length;
-    const activeMembers = rawData.activeMembers || 22;
+    const totalSessions = rawData.sessionsTotal || (rawData.games ? rawData.games.reduce((acc, g) => acc + (g.sessions || 0), 0) : 0);
+    const totalGames = rawData.games ? rawData.games.length : 0;
+    const activeMembers = rawData.activeMembers || 24;
 
     res.json({
       success: true,
+      association: "Les Ludophiles d'Asnières et d'ailleurs",
       kpis: {
         totalSessions,
         totalGames,
         activeMembers,
-        topGame: rawData.games.sort((a,b) => b.sessions - a.sessions)[0]?.name || "Fading Suns"
+        topGame: rawData.games && rawData.games.length > 0 
+          ? rawData.games.sort((a,b) => b.sessions - a.sessions)[0]?.name 
+          : "N/A"
       },
-      games: rawData.games,
+      games: rawData.games || [],
       recentSessions: rawData.recentSessions || []
     });
   } catch (err) {
@@ -61,5 +90,5 @@ app.get('/api/kpis', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`JdR92 KPI Dashboard running on port ${PORT}`);
+  console.log(`[LudoMeter] 🚀 Server running securely on port ${PORT}`);
 });
