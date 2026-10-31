@@ -27,7 +27,7 @@ async function fetchDiscordChannelData() {
   try {
     console.log('[LudoMeter] 🌐 Fetching live data from Discord API (#jdr-agenda & #organisation-tables)...');
     const headers = {
-      'Authorization': DISCORD_TOKEN.startsWith('Bot ') || DISCORD_TOKEN.startsWith('Bearer ') ? DISCORD_TOKEN : `Bot ${DISCORD_TOKEN}`,
+      'Authorization': DISCORD_TOKEN,
       'Content-Type': 'application/json'
     };
 
