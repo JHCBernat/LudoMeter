@@ -385,8 +385,8 @@
     </div>
 
     <div class="diag-banner" id="diag-banner">
-      <span id="diag-status">🔄 Chargement des données Discord en direct...</span>
-      <button onclick="loadData()" style="background:transparent; border:none; color:var(--gold); font-size:0.8rem; cursor:pointer;">↻ Actualiser</button>
+      <span id="diag-status">🔄 Chargement des données...</span>
+      <span style="font-size:0.68rem; color:var(--text-muted); opacity:0.85;">Sync auto : 1h</span>
     </div>
 
     <div class="kpi-grid">
@@ -501,7 +501,7 @@
 
         if (data.success) {
           statusText.innerText = `Sync ${data.lastSync || 'Live'}`;
-          diagStatus.innerText = `✅ Synchronisé à ${data.lastSync || 'l\'instant'} (${data.wednesdaySessions.length} séances futures, ${data.games.length} jeux joués)`;
+          diagStatus.innerText = `🟢 Mis à jour à ${data.lastSync || 'l\'instant'} (prochaine sync auto à ${data.nextSync || 'dans 1h'})`;
 
           document.getElementById('kpi-sessions').innerText = data.kpis.totalSessions;
           document.getElementById('kpi-games').innerText = data.kpis.totalGames;
