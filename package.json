@@ -1,10 +1,11 @@
 {
-  "name": "jdr-kpi-pwa",
-  "version": "1.0.0",
-  "description": "JdR92 KPI Dashboard PWA",
+  "name": "ludometer-pwa",
+  "version": "1.1.0",
+  "description": "LudoMeter PWA • Les Ludophiles d'Asnières",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test/test_discord_scraping.js"
   },
   "dependencies": {
     "express": "^4.19.2",

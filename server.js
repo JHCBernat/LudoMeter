@@ -14,6 +14,10 @@ const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const ORG_CHANNEL_ID = process.env.DISCORD_CHANNEL_ORG_ID || "900499534109630484";
 const AGENDA_CHANNEL_ID = process.env.DISCORD_CHANNEL_AGENDA_ID || "1318237559213658164";
 
+let lastSyncStatus = {
+  time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+};
+
 // Local fallback history path
 const historyPath = process.env.DISCORD_HISTORY_PATH || path.join(__dirname, 'data', 'discord_sessions_history.json');
 
@@ -32,7 +36,27 @@ function getHistoryPath() {
   return path.join(__dirname, 'data', 'discord_sessions_history.json');
 }
 
-// Helper to fetch live data directly from Les Ludophiles d'Asnières Discord channels
+// Helper to clean up game titles from Discord formatting
+function cleanGameName(rawName) {
+  if (!rawName) return null;
+  let name = rawName
+    .replace(/^#+\s*/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/🎬\s*[:\-]*/g, '')
+    .replace(/jdr\s*\d*\s*[:\-]/gi, '')
+    .replace(/table\s*\d*\s*[:\-]/gi, '')
+    .replace(/\(complet\)/gi, '')
+    .replace(/<@&?\d+>/g, '')
+    .replace(/titre\s*[:\-]/gi, '')
+    .trim();
+
+  if (name.length < 3 || name.toLowerCase().startsWith('séance') || name.toLowerCase().includes('http') || name.toLowerCase().startsWith('responsable')) {
+    return null;
+  }
+  return name;
+}
+
+// Scraper for Ludophiles Discord (#organisation-tables & #jdr-agenda forum threads)
 async function fetchLudophilesData() {
   if (!DISCORD_TOKEN) {
     console.log('[LudoMeter] ⚠️ No DISCORD_TOKEN found in .env.');
@@ -40,121 +64,127 @@ async function fetchLudophilesData() {
   }
 
   try {
-    console.log(`[LudoMeter] 🌐 Fetching live data from Ludophiles channels (Org: ${ORG_CHANNEL_ID}, Agenda: ${AGENDA_CHANNEL_ID})...`);
+    console.log(`[LudoMeter] 🌐 Fetching live data from Ludophiles channels...`);
     const headers = {
       'Authorization': DISCORD_TOKEN,
       'Content-Type': 'application/json'
     };
 
-    const fetchOrg = fetch(`https://discord.com/api/v10/channels/${ORG_CHANNEL_ID}/messages?limit=50`, { headers }).then(r => r.ok ? r.json() : []);
-    const fetchAgenda = fetch(`https://discord.com/api/v10/channels/${AGENDA_CHANNEL_ID}/messages?limit=50`, { headers }).then(r => r.ok ? r.json() : []);
-    const fetchThreads = fetch(`https://discord.com/api/v10/channels/${AGENDA_CHANNEL_ID}/threads/active`, { headers }).then(r => r.ok ? r.json() : { threads: [] });
+    // 1. Fetch organization messages (signups)
+    const fetchOrg = fetch(`https://discord.com/api/v10/channels/${ORG_CHANNEL_ID}/messages?limit=50`, { headers })
+      .then(r => r.ok ? r.json() : []);
 
-    const [orgMessages, agendaMessages, activeThreadsData] = await Promise.all([fetchOrg, fetchAgenda, fetchThreads]);
+    // 2. Fetch agenda forum threads
+    const fetchAgendaThreads = fetch(`https://discord.com/api/v10/channels/${AGENDA_CHANNEL_ID}/threads/archived/public?limit=30`, { headers })
+      .then(r => r.ok ? r.json() : { threads: [] });
 
-    console.log(`[LudoMeter] ✅ Fetched ${orgMessages.length} org messages, ${agendaMessages.length} agenda messages, and ${activeThreadsData.threads?.length || 0} active threads.`);
+    const [orgMessages, agendaData] = await Promise.all([fetchOrg, fetchAgendaThreads]);
+    const agendaThreads = agendaData.threads || [];
 
-    const sessionsMap = {};
+    console.log(`[LudoMeter] ✅ Fetched ${orgMessages.length} org messages, ${agendaThreads.length} agenda forum threads.`);
+
+    lastSyncStatus.time = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
     const gameCounts = {};
-    const allItems = [...(activeThreadsData.threads || []), ...agendaMessages, ...orgMessages];
-    
-    allItems.forEach(item => {
-      // Extract raw texts from content, name, and embeds
-      let rawTexts = [];
-      if (item.content) rawTexts.push(item.content);
-      if (item.name) rawTexts.push(item.name);
-      if (item.embeds && Array.isArray(item.embeds)) {
-        item.embeds.forEach(emb => {
-          if (emb.title) rawTexts.push(emb.title);
-          if (emb.description) rawTexts.push(emb.description);
-          if (emb.fields && Array.isArray(emb.fields)) {
-            emb.fields.forEach(f => {
-              if (f.name) rawTexts.push(f.name);
-              if (f.value) rawTexts.push(f.value);
-            });
-          }
-        });
-      }
+    const wednesdaySessions = [];
 
-      const content = rawTexts.join('\n').trim();
-      if (content.length > 2 && !content.toLowerCase().includes('http')) {
-        const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Prochainement";
-        const threadId = item.id || item.thread_id || Math.random().toString();
+    // Filter Wednesday threads in #jdr-agenda
+    const wednesdayThreads = agendaThreads.filter(t => t.name.toLowerCase().includes('mercredi'));
 
-        const lines = content.split('\n');
-        const sessionTitle = lines[0].replace(/\*\*/g, '').trim();
+    // Fetch messages for each Wednesday thread (up to 7 most recent)
+    for (const thread of wednesdayThreads.slice(0, 7)) {
+      try {
+        const resThreadMsgs = await fetch(`https://discord.com/api/v10/channels/${thread.id}/messages?limit=10`, { headers });
+        if (resThreadMsgs.ok) {
+          const threadMsgs = await resThreadMsgs.json();
+          const tables = [];
 
-        const tables = [];
-        let currentTable = { table_num: 1, game_name: sessionTitle, mj: "👑 MJ: Association", participants: [] };
+          threadMsgs.forEach(msg => {
+            const content = msg.content || '';
+            const lines = content.split('\n');
 
-        lines.slice(1).forEach(line => {
-          const cleanLine = line.replace(/\*\*/g, '').trim();
-          if (cleanLine.length > 2) {
-            if (cleanLine.toLowerCase().includes('mj') || cleanLine.includes('👑')) {
-              currentTable.mj = cleanLine;
-            } else if (cleanLine.startsWith('-') || cleanLine.startsWith('•') || cleanLine.toLowerCase().includes('table')) {
-              if (currentTable.game_name && currentTable.game_name !== sessionTitle) {
-                tables.push(currentTable);
-                currentTable = { table_num: tables.length + 1, game_name: cleanLine, mj: "👑 MJ: Association", participants: [] };
-              } else {
-                currentTable.game_name = cleanLine;
-              }
-            } else {
-              currentTable.participants.push(cleanLine);
+            const titleLine = lines.find(l => l.includes('🎬') || l.toLowerCase().includes('titre :') || l.toLowerCase().includes('jdr'));
+            const mjLine = lines.find(l => l.includes('👑') || l.toLowerCase().includes('mj'));
+            const systemLine = lines.find(l => l.includes('🎲') || l.toLowerCase().includes('système'));
+
+            const rawGame = titleLine || (lines[0] && !lines[0].includes('chanson') ? lines[0] : null);
+            const cleanedGame = cleanGameName(rawGame);
+
+            if (cleanedGame) {
+              const mj = mjLine ? mjLine.replace(/\*\*/g, '').trim() : "👑 MJ: Association";
+              const system = systemLine ? systemLine.replace(/\*\*/g, '').trim() : null;
+
+              tables.push({
+                num: tables.length + 1,
+                game: cleanedGame,
+                system: system,
+                mj: mj,
+                author: msg.author ? msg.author.username : "MJ",
+                details: content
+              });
+
+              gameCounts[cleanedGame] = (gameCounts[cleanedGame] || 0) + 1;
             }
-          }
-        });
+          });
 
-        if (tables.length === 0) {
-          tables.push(currentTable);
-        }
+          const createDate = thread.thread_metadata?.create_timestamp
+            ? new Date(thread.thread_metadata.create_timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+            : thread.name;
 
-        if (!sessionsMap[threadId]) {
-          sessionsMap[threadId] = {
-            title: sessionTitle || "Session JDR",
-            date: dateStr,
-            thread_id: threadId,
-            tables
-          };
+          wednesdaySessions.push({
+            id: thread.id,
+            title: thread.name,
+            date: createDate,
+            tablesCount: tables.length,
+            tables: tables
+          });
         }
-
-        if (sessionTitle && sessionTitle.length > 2) {
-          gameCounts[sessionTitle] = (gameCounts[sessionTitle] || 0) + 1;
-        }
+      } catch (err) {
+        console.warn(`[LudoMeter] Warning reading thread ${thread.name}:`, err.message);
       }
+    }
+
+    // Also extract games from #organisation-tables messages
+    orgMessages.forEach(msg => {
+      const content = msg.content || '';
+      const lines = content.split('\n');
+      lines.forEach(line => {
+        if (line.includes('JDR') || line.includes('###') || line.includes('🎲')) {
+          const game = cleanGameName(line);
+          if (game) {
+            gameCounts[game] = (gameCounts[game] || 0) + 1;
+          }
+        }
+      });
     });
 
-    const sessionsList = Object.values(sessionsMap);
     const gamesArray = Object.keys(gameCounts).map(name => ({
       name,
       sessions: gameCounts[name],
       players: 4
     })).sort((a, b) => b.sessions - a.sessions);
 
+    const topGame = gamesArray.length > 0 ? gamesArray[0].name : "Warhammer / Delta Green";
+    const totalSessions = wednesdaySessions.length || orgMessages.length;
+
     return {
       success: true,
       source: 'discord-live-ludophiles',
-      lastSync: lastSyncStatus.time || '13:00',
+      lastSync: lastSyncStatus.time,
+      diagnostics: {
+        orgMessagesCount: orgMessages.length,
+        agendaThreadsCount: agendaThreads.length
+      },
       association: "Les Ludophiles d'Asnières et d'ailleurs",
       kpis: {
-        totalSessions: sessionsList.length,
-        totalGames: gamesArray.length || 1,
-        activeMembers: 32,
-        topGame: gamesArray.length > 0 ? gamesArray[0].name : "JDR Asnières"
+        totalSessions,
+        totalGames: gamesArray.length,
+        activeMembers: 52,
+        topGame
       },
-      games: gamesArray.length > 0 ? gamesArray : [{ name: "Tables JDR & Plateau", sessions: sessionsList.length, players: 4 }],
-      wednesdaySessions: sessionsList.map(s => ({
-        title: s.title,
-        date: s.date,
-        tablesCount: s.tables.length,
-        tables: s.tables
-      })),
-      recentSessions: sessionsList.map(s => ({
-        title: s.title,
-        date: s.date,
-        tablesCount: s.tables.length,
-        tables: s.tables
-      }))
+      games: gamesArray,
+      wednesdaySessions,
+      recentSessions: wednesdaySessions
     };
   } catch (err) {
     console.error('[LudoMeter] ❌ Error fetching live Ludophiles Discord API:', err);

@@ -2,21 +2,27 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LudoMeter • Ludophiles d'Asnières</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LudoMeter • Les Ludophiles d'Asnières</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#05060a">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="theme-color" content="#7B132B">
   <style>
     :root {
-      --bg-deep: #120e0b;
-      --bg-card: rgba(35, 26, 18, 0.85);
-      --card-border: rgba(212, 175, 55, 0.35);
-      --card-border-hover: rgba(212, 175, 55, 0.8);
-      --text: #fdfaf3;
-      --text-muted: #c4b69c;
-      --gold: #d4af37;
-      --gold-light: #fbe8a6;
+      --bg-deep: #13080B;
+      --bg-surface: #1E0C12;
+      --bg-card: rgba(36, 16, 22, 0.92);
+      --card-border: rgba(212, 175, 55, 0.3);
+      --card-border-hover: rgba(212, 175, 55, 0.85);
+      --bordeaux: #7B132B;
+      --bordeaux-light: #9E1B38;
+      --bordeaux-glow: rgba(158, 27, 56, 0.45);
+      --gold: #D4AF37;
+      --gold-light: #FCE8A6;
       --gold-glow: rgba(212, 175, 55, 0.4);
+      --text: #FDF9F3;
+      --text-muted: #D1B89D;
       --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     }
 
@@ -24,7 +30,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -32,14 +38,12 @@
       background-color: var(--bg-deep);
       color: var(--text);
       min-height: 100vh;
-      padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
-      max-width: 480px; /* Optimized mobile-first for Galaxy S23 */
+      padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
+      max-width: 480px;
       margin: 0 auto;
       background-image: 
-        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.2) 0%, transparent 70%),
-        url('https://images.unsplash.com/photo-1514539079130-25950c84af65?q=80&w=1000&auto=format&fit=crop');
-      background-size: cover;
-      background-blend-mode: overlay;
+        radial-gradient(circle at 50% 0%, var(--bordeaux-glow) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
       background-attachment: fixed;
     }
 
@@ -47,171 +51,75 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
       padding-top: env(safe-area-inset-top);
-      background: rgba(18, 14, 11, 0.92);
-      padding: 14px 18px;
-      border-radius: 16px;
+      background: rgba(30, 12, 18, 0.95);
+      padding: 12px 16px;
+      border-radius: 18px;
       border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    .brand-group h1 {
-      font-size: 1.35rem;
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
       color: var(--gold-light);
-      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+      line-height: 1.1;
     }
 
-    .brand-group p {
-      font-size: 0.72rem;
+    .brand-text p {
+      font-size: 0.7rem;
       color: var(--text-muted);
-      margin-top: 2px;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 600;
     }
 
-    .badge {
-      font-size: 0.7rem;
+    .status-badge {
+      font-size: 0.68rem;
       font-weight: 700;
-      padding: 6px 12px;
-      background: rgba(212, 175, 55, 0.2);
+      padding: 5px 10px;
+      background: rgba(123, 19, 43, 0.4);
       border: 1px solid var(--gold);
       border-radius: 20px;
       color: var(--gold-light);
-      box-shadow: 0 0 14px var(--gold-glow);
-    }
-
-    /* Hero Banner with TTRPG Illustration Asset */
-    .hero-banner {
-      position: relative;
-      border-radius: 20px;
-      overflow: hidden;
-      margin-bottom: 22px;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    }
-
-    .hero-banner img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      display: block;
-      filter: brightness(0.8) sepia(0.25) saturate(1.2);
-      transition: transform 600ms var(--ease-out);
-    }
-
-    .hero-banner:hover img {
-      transform: scale(1.04);
-    }
-
-    .hero-overlay {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(0deg, rgba(18,14,11,0.96) 0%, rgba(18,14,11,0.5) 75%, transparent 100%);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    .hero-title {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--gold-light);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
-
-    .hero-sub {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* KPI Grid - Luminous Magical Cards */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 26px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 16px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition: transform 160ms var(--ease-out), border-color 200ms ease, box-shadow 200ms ease;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    }
-
-    .kpi-card:active {
-      transform: scale(0.97);
-      border-color: var(--card-border-hover);
-      box-shadow: 0 0 18px var(--gold-glow);
-    }
-
-    .kpi-label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 700;
-    }
-
-    .kpi-value {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--gold-light);
-      letter-spacing: -0.03em;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
-    }
-
-    /* Sections */
-    section {
-      margin-bottom: 26px;
-    }
-
-    h2 {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--gold);
-      margin-bottom: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 8px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      gap: 5px;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
     }
 
-    h2::before {
-      content: '⚔️';
-      font-size: 0.9rem;
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #76ff03;
+      box-shadow: 0 0 6px #76ff03;
     }
 
-    .list-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* Tabs Navigation */
     .tabs-nav {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
-      background: rgba(18, 14, 11, 0.8);
-      padding: 6px;
-      border-radius: 16px;
+      margin-bottom: 18px;
+      background: rgba(30, 12, 18, 0.85);
+      padding: 5px;
+      border-radius: 14px;
       border: 1px solid var(--card-border);
     }
 
@@ -223,16 +131,17 @@
       color: var(--text-muted);
       font-size: 0.82rem;
       font-weight: 700;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 200ms var(--ease-out);
       text-align: center;
     }
 
     .tab-btn.active {
-      background: var(--gold);
-      color: var(--bg-deep);
-      box-shadow: 0 2px 12px var(--gold-glow);
+      background: linear-gradient(135deg, var(--bordeaux) 0%, var(--bordeaux-light) 100%);
+      color: #fff;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      box-shadow: 0 2px 12px rgba(123, 19, 43, 0.6);
     }
 
     .tab-pane {
@@ -243,162 +152,272 @@
       display: block;
     }
 
-    .table-card {
-      background: rgba(18, 14, 11, 0.6);
-      border: 1px solid rgba(212, 175, 55, 0.15);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 8px;
+    .jdr-hero-banner {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      background: linear-gradient(135deg, #2D0B14 0%, #15060A 100%);
+      padding: 18px;
     }
 
-    .table-header {
-      font-size: 0.85rem;
-      font-weight: 700;
+    .hero-top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--gold);
       color: var(--gold-light);
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
     }
 
-    .table-participants {
-      font-size: 0.75rem;
+    .hero-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .hero-trimestre {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .hero-sub {
+      font-size: 0.74rem;
       color: var(--text-muted);
       line-height: 1.4;
+    }
+
+    .diag-banner {
+      background: rgba(123, 19, 43, 0.25);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.74rem;
+      color: var(--gold-light);
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .kpi-card:active {
+      transform: scale(0.97);
+    }
+
+    .kpi-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 140ms var(--ease-out), border-color 160ms ease;
     }
 
     .list-item:active {
       transform: scale(0.98);
       border-color: var(--card-border-hover);
-      box-shadow: 0 0 14px var(--gold-glow);
-    }
-
-    .item-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      max-width: 62%;
     }
 
     .item-title {
-      font-size: 0.94rem;
+      font-size: 0.92rem;
       font-weight: 700;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: #fff;
     }
 
     .item-sub {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
+      margin-top: 3px;
     }
 
     .item-badge {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      color: var(--bg-deep);
-      background: var(--gold);
-      padding: 6px 12px;
+      color: #fff;
+      background: var(--bordeaux);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 5px 11px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
       white-space: nowrap;
     }
 
-    /* Stagger entry animation */
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .table-detail-card {
+      background: rgba(20, 8, 12, 0.7);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 8px;
     }
 
-    .animate-in {
-      animation: fadeUp 350ms var(--ease-out) forwards;
-      opacity: 0;
+    .table-detail-header {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
     }
 
-    .delay-1 { animation-delay: 50ms; }
-    .delay-2 { animation-delay: 100ms; }
-    .delay-3 { animation-delay: 150ms; }
-    .delay-4 { animation-delay: 200ms; }
+    .system-badge {
+      font-size: 0.68rem;
+      background: rgba(212, 175, 55, 0.2);
+      color: var(--gold-light);
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .table-detail-body {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
 
-  <header class="animate-in">
+  <header>
     <div class="brand-group">
-      <h1>LudoMeter</h1>
-      <p>Les Ludophiles d'Asnières</p>
+      <img class="brand-logo" src="https://www.ludophiles.fr/wp-content/uploads/2018/06/Logo-et-titre-couleur-900-e1528351125644.png" alt="Logo Ludophiles d'Asnières">
+      <div class="brand-text">
+        <h1>LudoMeter</h1>
+        <p>Ludophiles d'Asnières</p>
+      </div>
     </div>
-    <div class="badge" id="status-badge">⚡ Live NAS</div>
+    <div class="status-badge" id="status-badge">
+      <span class="status-dot"></span>
+      <span id="status-text">Sync Live</span>
+    </div>
   </header>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs-nav animate-in delay-1">
+  <div class="tabs-nav">
     <button class="tab-btn active" onclick="switchTab('stats')">📊 Statistiques</button>
     <button class="tab-btn" onclick="switchTab('wednesdays')">🗓️ Mercredis JDR</button>
   </div>
 
-  <!-- TAB 1: STATS & GAMES -->
-  <div id="tab-stats" class="tab-pane active animate-in delay-2">
-    <!-- Immersive TTRPG Hero Asset Banner -->
-    <div class="hero-banner">
-      <img src="https://images.unsplash.com/photo-1514539079130-25950c84af65?q=80&w=1000&auto=format&fit=crop" alt="Tabletop RPG Tavern Atmosphere">
-      <div class="hero-overlay">
-        <div>
-          <div class="hero-title">Les Ludophiles d'Asnières</div>
-          <div class="hero-sub">Tables de JDR & Jeux de Plateau • Asnières-sur-Seine</div>
-        </div>
-        <div style="font-size: 1.5rem;">🏰</div>
+  <div id="tab-stats" class="tab-pane active">
+    <div class="jdr-hero-banner">
+      <div class="hero-top-badge">🎲 Focus JDR • Saison 2026</div>
+      <div class="hero-title">Jeux de Rôle aux Ludophiles</div>
+      <div class="hero-trimestre">
+        <span>🏆 Jeu du Trimestre :</span>
+        <strong id="hero-game-highlight">Warhammer / Delta Green</strong>
       </div>
+      <div class="hero-sub">
+        Séances en format court (19h30 - 22h30) les mercredis soirs • Première séance découverte offerte et sans engagement.
+      </div>
+    </div>
+
+    <div class="diag-banner" id="diag-banner">
+      <span id="diag-status">🔄 Chargement des données Discord en direct...</span>
+      <button onclick="loadData()" style="background:transparent; border:none; color:var(--gold); font-size:0.8rem; cursor:pointer;">↻ Actualiser</button>
     </div>
 
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-label">Séances Jouées</div>
+        <div class="kpi-label">Séances Déclarées</div>
         <div class="kpi-value" id="kpi-sessions">-</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Campagnes</div>
+        <div class="kpi-label">Jeux & Campagnes</div>
         <div class="kpi-value" id="kpi-games">-</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Membres Actifs</div>
+        <div class="kpi-label">Joueurs Rentrée</div>
         <div class="kpi-value" id="kpi-members">-</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Jeu Phare</div>
-        <div class="kpi-value" id="kpi-top" style="font-size: 1.05rem; padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+        <div class="kpi-value" id="kpi-top" style="font-size: 1.02rem; padding-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
       </div>
     </div>
 
     <section>
-      <h2>Campagnes & Jeux</h2>
+      <h2>⚔️ Campagnes & Univers Joués</h2>
       <div class="list-container" id="games-list">
         <div class="list-item">
-          <div class="item-info">
-            <div class="item-title">Invocation des tables...</div>
-            <div class="item-sub">Lecture du grimoire</div>
-          </div>
-          <div class="item-badge">...</div>
+          <div class="item-title">Lecture des salons Discord...</div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- TAB 2: WEDNESDAY SESSIONS FROM JDR-AGENDA -->
-  <div id="tab-wednesdays" class="tab-pane animate-in delay-2">
+  <div id="tab-wednesdays" class="tab-pane">
     <section>
-      <h2>Prochaines Sessions du Mercredi (#jdr-agenda)</h2>
+      <h2>🗓️ Sessions du Mercredi (#jdr-agenda)</h2>
       <div class="list-container" id="wednesday-list">
         <div class="list-item">
-          <div class="item-info">
-            <div class="item-title">Consultation du grimoire d'agenda...</div>
-          </div>
+          <div class="item-title">Lecture des posts de l'agenda...</div>
         </div>
       </div>
     </section>
@@ -421,90 +440,116 @@
     function toggleSession(idx) {
       const el = document.getElementById(`session-tables-${idx}`);
       if (el) {
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
       }
     }
 
     async function loadData() {
-      try {
-        console.log('[LudoMeter Frontend] 🔄 Fetching KPI & Agenda data from /api/kpis...');
-        const res = await fetch('/api/kpis');
-        const data = await res.json();
-        
-        console.log('[LudoMeter Frontend] 📥 API Response received:', data);
-        console.log('[LudoMeter Frontend] 🔌 Data Source:', data.source);
+      const statusText = document.getElementById('status-text');
+      const diagStatus = document.getElementById('diag-status');
 
-        // Update status badge with last sync timestamp & source status
-        const statusBadge = document.getElementById('status-badge');
-        if (data.success && data.lastSync) {
-          statusBadge.innerText = `🟢 Sync à ${data.lastSync}`;
-          statusBadge.style.color = '#76ff03';
+      console.group('🔍 [LudoMeter Audit Diagnostic API & Data]');
+      try {
+        console.log('[Check HTTP] Requête vers /api/kpis en cours...');
+        const res = await fetch('/api/kpis');
+        
+        if (res.ok) {
+          console.log(`%c✅ [Check HTTP] Requête /api/kpis réussie (Status ${res.status})`, 'color:#2ecc71; font-weight:bold;');
         } else {
-          statusBadge.innerText = '⚠️ Échec Sync';
-          statusBadge.style.color = '#ff4d4d';
+          console.error(`%c❌ [Check HTTP] Erreur HTTP ${res.status}: ${res.statusText}`, 'color:#e74c3c; font-weight:bold;');
         }
 
+        const data = await res.json();
+
+        if (data.source === 'discord-live-ludophiles') {
+          console.log('%c✅ [Check Source] Flux direct Discord Ludophiles connecté', 'color:#2ecc71; font-weight:bold;');
+        } else {
+          console.warn(`%c⚠️ [Check Source] Flux alternatif ou non direct: ${data.source}`, 'color:#f39c12; font-weight:bold;');
+        }
+
+        if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
+          console.log(`%c✅ [Check Agenda] ${data.wednesdaySessions.length} séances du mercredi reçues (#jdr-agenda)`, 'color:#2ecc71; font-weight:bold;');
+        } else {
+          console.error('%c❌ [Check Agenda] ERREUR : Aucune séance du mercredi trouvée (données vides)', 'color:#e74c3c; font-weight:bold;');
+        }
+
+        if (data.games && data.games.length > 0) {
+          console.log(`%c✅ [Check Jeux] ${data.games.length} jeux/campagnes identifiés`, 'color:#2ecc71; font-weight:bold;');
+        } else {
+          console.error('%c❌ [Check Jeux] ERREUR : Aucun jeu identifié (données vides)', 'color:#e74c3c; font-weight:bold;');
+        }
+
+        if (data.kpis && data.kpis.totalSessions > 0) {
+          console.log('%c✅ [Check KPIs] Métriques valides:', 'color:#2ecc71; font-weight:bold;', data.kpis);
+        } else {
+          console.warn('%c⚠️ [Check KPIs] Métriques à zéro ou incomplètes', 'color:#f39c12; font-weight:bold;', data.kpis);
+        }
+        console.groupEnd();
+
         if (data.success) {
+          statusText.innerText = `Sync ${data.lastSync || 'Live'}`;
+          diagStatus.innerText = `✅ Synchronisé à ${data.lastSync || 'l\'instant'} (${data.wednesdaySessions.length} séances, ${data.games.length} jeux)`;
+
           document.getElementById('kpi-sessions').innerText = data.kpis.totalSessions;
           document.getElementById('kpi-games').innerText = data.kpis.totalGames;
           document.getElementById('kpi-members').innerText = data.kpis.activeMembers;
           document.getElementById('kpi-top').innerText = data.kpis.topGame;
+          document.getElementById('hero-game-highlight').innerText = data.kpis.topGame;
 
-          // Populate games
           const gamesContainer = document.getElementById('games-list');
           if (data.games && data.games.length > 0) {
             gamesContainer.innerHTML = data.games.map(g => `
               <div class="list-item">
-                <div class="item-info">
+                <div>
                   <div class="item-title">${g.name}</div>
-                  <div class="item-sub">${g.sessions} sessions enregistrées</div>
+                  <div class="item-sub">${g.sessions} table(s) ou mention(s) enregistrée(s)</div>
                 </div>
                 <div class="item-badge">Actif</div>
               </div>
             `).join('');
           } else {
-            gamesContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune campagne</div></div></div>';
+            gamesContainer.innerHTML = '<div class="list-item"><div class="item-title">⚠️ Aucun jeu trouvé dans les salons.</div></div>';
           }
 
-          // Populate Wednesday sessions with collapsible accordions
           const wednesdayContainer = document.getElementById('wednesday-list');
           if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
             wednesdayContainer.innerHTML = data.wednesdaySessions.map((s, idx) => `
               <div class="list-item" style="flex-direction: column; align-items: stretch; cursor: pointer;" onclick="toggleSession(${idx})">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div>
-                    <div class="item-title" style="color: var(--gold-light);">${s.title}</div>
-                    <div class="item-sub">📅 ${s.date} • Cliquer pour ${s.tablesCount > 0 ? 'voir les tables' : 'détails'}</div>
+                    <div class="item-title" style="color: var(--gold-light); font-size: 0.96rem;">${s.title}</div>
+                    <div class="item-sub">📅 ${s.date} • Cliquer pour ${s.tablesCount > 0 ? 'déplier les tables' : 'détails'}</div>
                   </div>
                   <div class="item-badge">${s.tablesCount} table(s)</div>
                 </div>
                 <div id="session-tables-${idx}" style="display: none; margin-top: 10px; border-top: 1px solid rgba(212,175,55,0.2); padding-top: 8px;">
                   ${s.tables && s.tables.length > 0 ? s.tables.map(t => `
-                    <div class="table-card">
-                      <div class="table-header">
-                        <span>Table #${t.num} : ${t.game}</span>
+                    <div class="table-detail-card">
+                      <div class="table-detail-header">
+                        <span>🎬 Table #${t.num} : ${t.game}</span>
+                        ${t.system ? `<span class="system-badge">${t.system}</span>` : ''}
                       </div>
-                      <div class="table-participants">
-                        ${t.mj}<br>
-                        👥 <strong>${t.participants.filter(p => !p.toLowerCase().includes('mj')).length}</strong> joueur(s) inscrits
-                        <div style="margin-top: 4px; font-size: 0.7rem; opacity: 0.8;">
-                          ${t.participants.join(' • ')}
-                        </div>
+                      <div class="table-detail-body">
+                        <div>${t.mj}</div>
+                        ${t.details ? `<div style="margin-top: 4px; font-size: 0.7rem; opacity: 0.85; white-space: pre-line;">${t.details.slice(0, 180)}...</div>` : ''}
                       </div>
                     </div>
-                  `).join('') : '<div class="item-sub" style="margin-top: 6px;">Aucune table enregistrée pour cette session.</div>'}
+                  `).join('') : '<div class="item-sub" style="margin-top: 6px;">Aucune table détaillée dans ce post.</div>'}
                 </div>
               </div>
             `).join('');
           } else {
-            wednesdayContainer.innerHTML = '<div class="list-item"><div class="item-info"><div class="item-title">Aucune session de mercredi trouvée dans l\'agenda</div></div></div>';
+            wednesdayContainer.innerHTML = '<div class="list-item"><div class="item-title">⚠️ Aucune séance du mercredi trouvée.</div></div>';
           }
+        } else {
+          statusText.innerText = 'Échec Sync';
+          diagStatus.innerText = '⚠️ Erreur de récupération des données Discord.';
         }
       } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-        document.getElementById('status-badge').innerText = '⚠️ Mode Hors-Ligne';
-        document.getElementById('status-badge').style.borderColor = '#ff4d4d';
-        document.getElementById('status-badge').style.color = '#ff4d4d';
+        console.error('%c❌ [Audit Erreur Réseau]: ' + err.message, 'color:#e74c3c; font-weight:bold;');
+        console.groupEnd();
+        statusText.innerText = 'Hors Ligne';
+        diagStatus.innerText = '⚠️ Erreur de communication avec le serveur local.';
       }
     }
 
