@@ -34,11 +34,17 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+    }
+
     body {
       background-color: var(--bg-deep);
       color: var(--text);
       min-height: 100vh;
-      padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
+      padding: 12px 14px calc(40px + env(safe-area-inset-bottom));
       max-width: 480px;
       margin: 0 auto;
       background-image: 
@@ -51,50 +57,48 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding-top: env(safe-area-inset-top);
       background: rgba(30, 12, 18, 0.95);
-      padding: 12px 16px;
-      border-radius: 18px;
+      padding: 10px 14px;
+      border-radius: 16px;
       border: 1px solid var(--card-border);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      width: 100%;
+      gap: 8px;
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
     }
 
     .brand-logo {
-      height: 38px;
-      width: auto;
+      height: 30px;
+      max-width: 130px;
       object-fit: contain;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      flex-shrink: 0;
     }
 
     .brand-text h1 {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: -0.01em;
       color: var(--gold-light);
-      line-height: 1.1;
-    }
-
-    .brand-text p {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .status-badge {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
-      padding: 5px 10px;
+      padding: 4px 9px;
       background: rgba(123, 19, 43, 0.4);
       border: 1px solid var(--gold);
       border-radius: 20px;
@@ -102,15 +106,18 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .status-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #76ff03;
       box-shadow: 0 0 6px #76ff03;
+      flex-shrink: 0;
     }
 
     .tabs-nav {
@@ -348,15 +355,14 @@
 
   <header>
     <div class="brand-group">
-      <img class="brand-logo" src="https://www.ludophiles.fr/wp-content/uploads/2018/06/Logo-et-titre-couleur-900-e1528351125644.png" alt="Logo Ludophiles d'Asnières">
+      <img class="brand-logo" src="https://www.ludophiles.fr/wp-content/uploads/2018/06/Logo-et-titre-couleur-900-e1528351125644.png" alt="Ludophiles">
       <div class="brand-text">
         <h1>LudoMeter</h1>
-        <p>Ludophiles d'Asnières</p>
       </div>
     </div>
     <div class="status-badge" id="status-badge">
       <span class="status-dot"></span>
-      <span id="status-text">Sync Live</span>
+      <span id="status-text">Live</span>
     </div>
   </header>
 
