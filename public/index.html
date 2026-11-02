@@ -444,6 +444,13 @@
       }
     }
 
+    function toggleGameDates(idx) {
+      const el = document.getElementById(`game-dates-${idx}`);
+      if (el) {
+        el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+      }
+    }
+
     async function loadData() {
       const statusText = document.getElementById('status-text');
       const diagStatus = document.getElementById('diag-status');
@@ -468,15 +475,15 @@
         }
 
         if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
-          console.log(`%c✅ [Check Agenda] ${data.wednesdaySessions.length} séances du mercredi reçues (#jdr-agenda)`, 'color:#2ecc71; font-weight:bold;');
+          console.log(`%c✅ [Check Agenda] ${data.wednesdaySessions.length} séances futures du mercredi reçues (#jdr-agenda)`, 'color:#2ecc71; font-weight:bold;');
         } else {
-          console.error('%c❌ [Check Agenda] ERREUR : Aucune séance du mercredi trouvée (données vides)', 'color:#e74c3c; font-weight:bold;');
+          console.error('%c❌ [Check Agenda] ERREUR : Aucune séance future trouvée', 'color:#e74c3c; font-weight:bold;');
         }
 
         if (data.games && data.games.length > 0) {
-          console.log(`%c✅ [Check Jeux] ${data.games.length} jeux/campagnes identifiés`, 'color:#2ecc71; font-weight:bold;');
+          console.log(`%c✅ [Check Jeux] ${data.games.length} systèmes/jeux répertoriés (#organisation-tables)`, 'color:#2ecc71; font-weight:bold;');
         } else {
-          console.error('%c❌ [Check Jeux] ERREUR : Aucun jeu identifié (données vides)', 'color:#e74c3c; font-weight:bold;');
+          console.error('%c❌ [Check Jeux] ERREUR : Aucun jeu répertorié', 'color:#e74c3c; font-weight:bold;');
         }
 
         if (data.kpis && data.kpis.totalSessions > 0) {
@@ -488,7 +495,7 @@
 
         if (data.success) {
           statusText.innerText = `Sync ${data.lastSync || 'Live'}`;
-          diagStatus.innerText = `✅ Synchronisé à ${data.lastSync || 'l\'instant'} (${data.wednesdaySessions.length} séances, ${data.games.length} jeux)`;
+          diagStatus.innerText = `✅ Synchronisé à ${data.lastSync || 'l\'instant'} (${data.wednesdaySessions.length} séances futures, ${data.games.length} jeux joués)`;
 
           document.getElementById('kpi-sessions').innerText = data.kpis.totalSessions;
           document.getElementById('kpi-games').innerText = data.kpis.totalGames;
@@ -496,21 +503,31 @@
           document.getElementById('kpi-top').innerText = data.kpis.topGame;
           document.getElementById('hero-game-highlight').innerText = data.kpis.topGame;
 
+          // Render Games list with Clickable Dates accordion (Source: #organisation-tables)
           const gamesContainer = document.getElementById('games-list');
           if (data.games && data.games.length > 0) {
-            gamesContainer.innerHTML = data.games.map(g => `
-              <div class="list-item">
-                <div>
-                  <div class="item-title">${g.name}</div>
-                  <div class="item-sub">${g.sessions} table(s) ou mention(s) enregistrée(s)</div>
+            gamesContainer.innerHTML = data.games.map((g, idx) => `
+              <div class="list-item" style="flex-direction: column; align-items: stretch; cursor: pointer;" onclick="toggleGameDates(${idx})">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div class="item-title">🎲 ${g.name}</div>
+                    <div class="item-sub">Cliquer pour voir les ${g.sessions} séance(s) jouée(s)</div>
+                  </div>
+                  <div class="item-badge">${g.sessions} séance(s)</div>
                 </div>
-                <div class="item-badge">Actif</div>
+                <div id="game-dates-${idx}" style="display: none; margin-top: 8px; border-top: 1px solid rgba(212,175,55,0.2); padding-top: 6px;">
+                  <div style="font-size: 0.72rem; color: var(--gold-light); margin-bottom: 4px;">📅 Dates enregistrées (#organisation-tables) :</div>
+                  ${g.dates && g.dates.length > 0 ? g.dates.map(d => `
+                    <div style="font-size: 0.72rem; color: var(--text-muted); padding: 2px 0;">• ${d}</div>
+                  `).join('') : '<div style="font-size: 0.7rem; color: var(--text-muted);">Dates dans l\'archive historique.</div>'}
+                </div>
               </div>
             `).join('');
           } else {
-            gamesContainer.innerHTML = '<div class="list-item"><div class="item-title">⚠️ Aucun jeu trouvé dans les salons.</div></div>';
+            gamesContainer.innerHTML = '<div class="list-item"><div class="item-title">⚠️ Aucun jeu trouvé dans #organisation-tables.</div></div>';
           }
 
+          // Render Wednesday Sessions with concise 🎬 and 🎲 lines only
           const wednesdayContainer = document.getElementById('wednesday-list');
           if (data.wednesdaySessions && data.wednesdaySessions.length > 0) {
             wednesdayContainer.innerHTML = data.wednesdaySessions.map((s, idx) => `
@@ -518,7 +535,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <div class="item-title" style="color: var(--gold-light); font-size: 0.96rem;">${s.title}</div>
-                    <div class="item-sub">📅 ${s.dateStr || s.date} • Cliquer pour ${s.tablesCount > 0 ? 'déplier les ' + s.tablesCount + ' table(s)' : 'détails'}</div>
+                    <div class="item-sub">📅 ${s.dateStr || s.date} • ${s.tablesCount} table(s) proposée(s)</div>
                   </div>
                   <div class="item-badge">${s.tablesCount} table(s)</div>
                 </div>
@@ -526,13 +543,13 @@
                   ${s.tables && s.tables.length > 0 ? s.tables.map(t => `
                     <div class="table-detail-card">
                       <div class="table-detail-header">
-                        <span>🎲 <strong>${t.system || t.game}</strong> • <em>${t.title || t.game}</em></span>
-                        <span class="system-badge">Table #${t.num}</span>
+                        <span>Table #${t.num}</span>
+                        <span class="system-badge">${t.system}</span>
                       </div>
-                      <div class="table-detail-body">
-                        <div>${t.mj}</div>
-                        ${t.participants && t.participants.length > 0 ? `<div style="margin-top: 3px; font-size: 0.72rem; color: var(--gold-light);">👥 ${t.participants.length} participant(s) : ${t.participants.join(' • ')}</div>` : ''}
-                        ${t.details ? `<div style="margin-top: 4px; font-size: 0.7rem; opacity: 0.85; white-space: pre-line;">${t.details.slice(0, 180)}...</div>` : ''}
+                      <div class="table-detail-body" style="margin-top: 4px;">
+                        ${(t.emojiLines || []).map(line => `<div style="padding: 1px 0; font-weight: 500;">${line}</div>`).join('')}
+                        ${t.mj ? `<div style="margin-top: 4px; color: var(--gold-light);">${t.mj}</div>` : ''}
+                        <div style="margin-top: 4px; font-size: 0.72rem; color: #a5d6a7;">👥 <strong>${t.playerCount || 0}</strong> joueur(s) inscrit(s)</div>
                       </div>
                     </div>
                   `).join('') : '<div class="item-sub" style="margin-top: 6px;">Aucune table détaillée dans ce post.</div>'}
