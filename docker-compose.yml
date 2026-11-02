@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
-  jdr-kpi:
+  ludometer:
     build: .
-    container_name: jdr-kpi-dashboard
+    container_name: ludometer
+    image: ludometer:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -11,11 +12,13 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_CHANNEL_ORG_ID=900499534109630484
+      - DISCORD_CHANNEL_AGENDA_ID=1318237559213658164
     volumes:
-      - /volume1/docker/hermes/data:/app/data
+      - ./data:/app/data
     networks:
-      - net
+      - ludometer-net
 
 networks:
-  net:
+  ludometer-net:
     driver: bridge

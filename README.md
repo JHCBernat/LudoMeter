@@ -35,7 +35,7 @@ L'application **LudoMeter** exploite directement le travail de fond de ton **Her
    - Le frontend (`public/index.html`) consomme uniquement l'API sécurisée exposée par le serveur via `/api/kpis`.
 
 4. **Déploiement Docker (PC ou NAS Synology) :**
+   Consultez le guide complet pas à pas : [DEPLOY_SYNOLOGY.md](./DEPLOY_SYNOLOGY.md).
    ```bash
-   docker build -t ludometer .
-   docker run -p 3000:3000 ludometer
+   docker compose up -d --build
    ```

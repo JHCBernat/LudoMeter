@@ -145,6 +145,20 @@ function extractSystemStrict(content) {
   return null;
 }
 
+// Helper to resolve Discord user/role mentions into human-readable names
+function resolveMentions(text, userMap) {
+  if (!text) return '';
+  return text
+    .replace(/<@&958441420618891304>/g, '') // Strip generic @JDR role
+    .replace(/<@&?\d+>/g, (match) => {
+      const id = match.replace(/\D/g, '');
+      const name = userMap.get(id);
+      return name ? `@${name}` : match;
+    })
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Scraper for Ludophiles Discord (#organisation-tables & #jdr-agenda forum threads)
 async function fetchLudophilesData() {
   if (!DISCORD_TOKEN) {
@@ -212,6 +226,10 @@ async function fetchLudophilesData() {
 
     lastSyncStatus.time = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
+    // Build global user mentions map (for resolving <@ID> to readable usernames)
+    const userMap = new Map();
+    orgMessages.forEach(m => m.mentions?.forEach(u => userMap.set(u.id, u.global_name || u.username)));
+
     // ==========================================
     // 1. STATISTIQUES DES JEUX : SOURCE = organisation-tables
     // ==========================================
@@ -260,6 +278,8 @@ async function fetchLudophilesData() {
           const resThreadMsgs = await fetch(`https://discord.com/api/v10/channels/${thread.id}/messages?limit=15`, { headers });
           if (resThreadMsgs.ok) {
             const threadMsgs = await resThreadMsgs.json();
+            threadMsgs.forEach(m => m.mentions?.forEach(u => userMap.set(u.id, u.global_name || u.username)));
+
             const tables = [];
 
             threadMsgs.forEach(msg => {
@@ -283,12 +303,15 @@ async function fetchLudophilesData() {
                 const titleLine = emojiLines.find(l => l.startsWith('🎬')) || emojiLines[0];
                 const sysLine = emojiLines.find(l => l.startsWith('🎲'));
 
+                const resolvedEmojiLines = emojiLines.map(el => resolveMentions(el, userMap));
+                const resolvedMj = mjLine ? resolveMentions(mjLine.replace(/\*\*/g, '').trim(), userMap) : "👑 MJ: Association";
+
                 tables.push({
                   num: tables.length + 1,
-                  emojiLines: emojiLines,
-                  title: titleLine ? titleLine.replace(/🎬\s*[:\-]*/g, '').replace(/titre\s*[:\-]*/gi, '').trim() : 'Table JDR',
-                  system: sysLine ? sysLine.replace(/🎲\s*[:\-]*/g, '').replace(/système\s*[:\-]*/gi, '').trim() : 'Indépendant',
-                  mj: mjLine ? mjLine.replace(/\*\*/g, '').trim() : "👑 MJ: Association",
+                  emojiLines: resolvedEmojiLines,
+                  title: titleLine ? resolveMentions(titleLine.replace(/🎬\s*[:\-]*/g, '').replace(/titre\s*[:\-]*/gi, '').trim(), userMap) : 'Table JDR',
+                  system: sysLine ? resolveMentions(sysLine.replace(/🎲\s*[:\-]*/g, '').replace(/système\s*[:\-]*/gi, '').trim(), userMap) : 'Indépendant',
+                  mj: resolvedMj,
                   playerCount: playerCount
                 });
               }
