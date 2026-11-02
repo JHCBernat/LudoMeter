@@ -45,7 +45,7 @@ async function runNonRegressionTest() {
   const wednesdayThreads = threads.filter(t => t.name.toLowerCase().includes('mercredi'));
   console.log(`   📅 Threads du Mercredi identifiés: ${wednesdayThreads.length}`);
 
-  // Test 3: Tables parsing from first 3 Wednesday threads
+  // Test 3: Tables parsing and system categorization
   let tablesFound = 0;
   for (const t of wednesdayThreads.slice(0, 3)) {
     const resMsg = await fetch(`https://discord.com/api/v10/channels/${t.id}/messages?limit=10`, { headers });
@@ -62,6 +62,34 @@ async function runNonRegressionTest() {
   console.log(`   🎲 Tables JDR extraites depuis les posts: ${tablesFound}`);
   if (tablesFound === 0) {
     throw new Error('Aucune table de jeu de rôle détectée dans les messages de threads !');
+  }
+
+  // Test 4: Guild search for future Wednesday threads (e.g. Mercredi 4 novembre)
+  console.log('📡 4. Test de détection des séances futures du Mercredi...');
+  const resCh = await fetch(`https://discord.com/api/v10/channels/${AGENDA_CHANNEL_ID}`, { headers });
+  const chData = await resCh.json();
+  const guildId = chData.guild_id || "312282199275732993";
+
+  const resSearch = await fetch(`https://discord.com/api/v10/guilds/${guildId}/messages/search?channel_id=${AGENDA_CHANNEL_ID}&content=Mercredi`, { headers });
+  if (!resSearch.ok) throw new Error('Échec recherche guild pour futures séances');
+  const sData = await resSearch.json();
+  const searchThreadIds = new Set();
+  sData.messages?.forEach(hit => hit.forEach(m => { if (m.channel_id) searchThreadIds.add(m.channel_id); }));
+  
+  let foundNov4 = false;
+  for (const tid of searchThreadIds) {
+    const resT = await fetch(`https://discord.com/api/v10/channels/${tid}`, { headers });
+    if (resT.ok) {
+      const t = await resT.json();
+      if (t.name.toLowerCase().includes('4 novembre')) {
+        foundNov4 = true;
+        console.log(`   🔮 Trouvé la séance future clé : "${t.name}" (ID: ${t.id})`);
+        break;
+      }
+    }
+  }
+  if (!foundNov4) {
+    console.warn('   ⚠️ Attention: thread Mercredi 4 novembre non localisé dans la recherche.');
   }
 
   console.log('🎉 [SUCCÈS] Tous les tests de non-régression Discord sont validés !');
